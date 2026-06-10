@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verificar Sincronización - Sistema de Inventario CEBE</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 100%;
+        padding: 40px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .subtitle {
+        color: #666;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: "Courier New", monospace;
+        transition: border-color 0.3s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+      }
+
+      button {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-test {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-test:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-clear {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .btn-clear:hover {
+        background: #d0d0d0;
+      }
+
+      .results {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        display: none;
+      }
+
+      .results.show {
+        display: block;
+      }
+
+      .results.success {
+        border-left-color: #4caf50;
+        background: #f1f8f4;
+      }
+
+      .results.error {
+        border-left-color: #f44336;
+        background: #fef5f5;
+      }
+
+      .results.warning {
+        border-left-color: #ff9800;
+        background: #fff9f0;
+      }
+
+      .result-item {
+        margin-bottom: 15px;
+        padding: 12px;
+        background: white;
+        border-radius: 6px;
+        border-left: 3px solid #ddd;
+      }
+
+      .result-item.ok {
+        border-left-color: #4caf50;
+      }
+
+      .result-item.error {
+        border-left-color: #f44336;
+      }
+
+      .result-item.warning {
+        border-left-color: #ff9800;
+      }
+
+      .result-label {
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .result-value {
+        color: #666;
+        font-size: 13px;
+        word-break: break-all;
+      }
+
+      .status-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+      }
+
+      .status-icon.ok {
+        background: #4caf50;
+      }
+
+      .status-icon.error {
+        background: #f44336;
+      }
+
+      .status-icon.warning {
+        background: #ff9800;
+      }
+
+      .loading {
+        text-align: center;
+        color: #667eea;
+        font-weight: 600;
+        margin: 20px 0;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 10px auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #1565c0;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .hint {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #856404;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Verificador de Sincronización</h1>
+      <p class="subtitle">
+        Verifica si tu Google Apps Script está correctamente configurado
+      </p>
+
+      <div class="info-box">
+        <strong>💡 Instrucciones:</strong> Pega la URL de tu Google Apps Script
+        abajo y haz click en "Verificar". Si no tienes URL, ve a tu Google Sheet
+        → Extensiones > Apps Script → Implementar.
+      </div>
+
+      <div class="form-group">
+        <label for="urlInput">URL de Google Apps Script:</label>
+        <input
+          type="text"
+          id="urlInput"
+          placeholder="https://script.google.com/macros/s/..."
+          value=""
+        />
+      </div>
+
+      <div class="button-group">
+        <button class="btn-test" onclick="verificar()">
+          ✓ Verificar Conexión
+        </button>
+        <button class="btn-clear" onclick="limpiar()">✕ Limpiar</button>
+      </div>
+
+      <div id="results" class="results">
+        <!-- Los resultados se insertan aquí dinámicamente -->
+      </div>
+    </div>
+
+    <script>
+      async function verificar() {
+        const url = document.getElementById("urlInput").value.trim();
+        const resultsDiv = document.getElementById("results");
+
+        // Validar que la URL esté presente
+        if (!url) {
+          mostrarError(
+            resultsDiv,
+            "Por favor, pega la URL de Google Apps Script primero.",
+          );
+          return;
+        }
+
+        // Validar formato de URL
+        if (!url.includes("script.google.com") || !url.includes("/macros/s/")) {
+          mostrarError(
+            resultsDiv,
+            "La URL no parece ser válida. Debe comenzar con https://script.google.com/macros/s/",
+          );
+          return;
+        }
+
+        // Mostrar loading
+        resultsDiv.className = "results show";
+        resultsDiv.innerHTML =
+          '<div class="loading"><div class="spinner"></div>Verificando...<br><small>(esto puede tomar unos segundos)</small></div>';
+
+        try {
+          const tests = await ejecutarTests(url);
+          mostrarResultados(resultsDiv, tests);
+        } catch (error) {
+          mostrarError(
+            resultsDiv,
+            `Error durante la verificación: ${error.message}`,
+          );
+        }
+      }
+
+      async function ejecutarTests(url) {
+        const tests = [];
+
+        // Test 1: URL Format
+        tests.push({
+          nombre: "Formato de URL",
+          tipo: validarFormatoURL(url) ? "ok" : "error",
+          mensaje: validarFormatoURL(url)
+            ? "URL tiene el formato correcto"
+            : "URL tiene un formato incorrecto",
+        });
+
+        // Test 2: Conectividad
+        try {
+          const response = await Promise.race([
+            fetch(url + "?action=read"),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Timeout")), 10000),
+            ),
+          ]);
+
+          tests.push({
+            nombre: "Conectividad",
+            tipo: "ok",
+            mensaje: `La conexión es exitosa (HTTP ${response.status})`,
+          });
+
+          // Test 3: Respuesta válida
+          try {
+            const data = await response.json();
+            tests.push({
+              nombre: "Formato de Respuesta",
+              tipo: Array.isArray(data) ? "ok" : "warning",
+              mensaje: Array.isArray(data)
+                ? `Se obtuvieron ${data.length} registros del inventario`
+                : "La respuesta no es un array (puede ser correcto si es un objeto)",
+            });
+          } catch (e) {
+            tests.push({
+              nombre: "Formato de Respuesta",
+              tipo: "error",
+              mensaje: "La respuesta no es JSON válido",
+            });
+          }
+        } catch (error) {
+          tests.push({
+            nombre: "Conectividad",
+            tipo: "error",
+            mensaje: `No se puede conectar: ${error.message}`,
+          });
+
+          tests.push({
+            nombre: "Formato de Respuesta",
+            tipo: "warning",
+            mensaje: "No se pudo verificar (conexión fallida)",
+          });
+        }
+
+        // Test 4: Verificación final
+        const todoOk = tests.every((t) => t.tipo !== "error");
+        tests.push({
+          nombre: "Estado General",
+          tipo: todoOk ? "ok" : "error",
+          mensaje: todoOk
+            ? "✅ Todo parece estar correctamente configurado"
+            : "❌ Hay problemas que necesitan ser resueltos",
+        });
+
+        return tests;
+      }
+
+      function validarFormatoURL(url) {
+        return (
+          url.includes("script.google.com") &&
+          url.includes("/macros/s/") &&
+          url.startsWith("https://")
+        );
+      }
+
+      function mostrarResultados(div, tests) {
+        let html =
+          '<h3 style="margin-bottom: 15px; color: #333;">📋 Resultados de Verificación</h3>';
+
+        const status = tests[tests.length - 1].tipo;
+        div.className = `results show ${status === "ok" ? "success" : "error"}`;
+
+        tests.forEach((test) => {
+          html += `
+                    <div class="result-item ${test.tipo}">
+                        <div class="result-label">
+                            <span class="status-icon ${test.tipo}">
+                                ${test.tipo === "ok" ? "✓" : test.tipo === "error" ? "✕" : "⚠"}
+                            </span>
+                            ${test.nombre}
+                        </div>
+                        <div class="result-value">${test.mensaje}</div>
+                    </div>
+                `;
+        });
+
+        if (tests[tests.length - 1].tipo === "error") {
+          html += `
+                    <div class="hint">
+                        <strong>💡 Sugerencia:</strong> Revisa el archivo TROUBLESHOOTING_SINCRONIA.md para más ayuda.
+                    </div>
+                `;
+        }
+
+        div.innerHTML = html;
+      }
+
+      function mostrarError(div, mensaje) {
+        div.className = "results show error";
+        div.innerHTML = `
+                <div class="result-item error">
+                    <div class="result-label">
+                        <span class="status-icon error">✕</span>
+                        Error de Validación
+                    </div>
+                    <div class="result-value">${mensaje}</div>
+                </div>
+            `;
+      }
+
+      function limpiar() {
+        document.getElementById("urlInput").value = "";
+        document.getElementById("results").className = "results";
+        document.getElementById("results").innerHTML = "";
+      }
+
+      // Permitir Enter para verificar
+      document
+        .getElementById("urlInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") verificar();
+        });
+    </script>
+  </body>
+</html>

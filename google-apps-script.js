@@ -18,18 +18,18 @@
  */
 
 var DEFAULT_HEADERS = [
-  "Item",
-  "Producto",
-  "Área",
-  "Descripción",
-  "Alto",
-  "Ancho",
-  "Largo",
-  "Marca",
-  "Observación",
-  "Estado",
-  "Código patrimonial",
-  "Inventariado",
+  "ITEM",
+  "PRODUCTO",
+  "ÁREA",
+  "DESCRIPCIÓN",
+  "ALTO (cm)",
+  "ANCHO (cm)",
+  "LARGO (cm)",
+  "MARCA",
+  "OBSERVACIÓN",
+  "ESTADO",
+  "CODIGO",
+  "INVENTARIADO",
 ];
 
 var FIELD_MAPPING = {
@@ -379,13 +379,42 @@ function addItem(itemData) {
   }
 
   if (emptyRowIndex !== -1) {
-    sheet
-      .getRange(info.headerRow + emptyRowIndex, 1, 1, rowValues.length)
-      .setValues([rowValues]);
+    var targetRange = sheet.getRange(
+      info.headerRow + emptyRowIndex,
+      1,
+      1,
+      rowValues.length,
+    );
+    targetRange.setValues([rowValues]);
+
+    // COPIAR FORMATO (incluyendo desplegables) de la fila superior (encabezados o fila anterior)
+    var sourceRange = sheet.getRange(info.headerRow, 1, 1, rowValues.length);
+    sourceRange.copyTo(
+      targetRange,
+      SpreadsheetApp.CopyPasteType.PASTE_DATA_VALIDATION,
+      false,
+    );
   } else {
-    sheet
-      .getRange(info.headerRow + data.length, 1, 1, rowValues.length)
-      .setValues([rowValues]);
+    var targetRange = sheet.getRange(
+      info.headerRow + data.length,
+      1,
+      1,
+      rowValues.length,
+    );
+    targetRange.setValues([rowValues]);
+
+    // COPIAR FORMATO (incluyendo desplegables) de la fila superior
+    var sourceRange = sheet.getRange(
+      info.headerRow + data.length - 1,
+      1,
+      1,
+      rowValues.length,
+    );
+    sourceRange.copyTo(
+      targetRange,
+      SpreadsheetApp.CopyPasteType.PASTE_DATA_VALIDATION,
+      false,
+    );
   }
 
   return { success: true, message: "Ítem agregado con éxito." };
@@ -448,8 +477,6 @@ function deleteItem(itemCode) {
     return { success: false, message: "No se encontró el ítem." };
   }
 
-  sheet
-    .getRange(info.headerRow + rowIndex, 1, 1, headers.length)
-    .clearContent();
+  sheet.deleteRow(info.headerRow + rowIndex);
   return { success: true, message: "Ítem eliminado con éxito." };
 }

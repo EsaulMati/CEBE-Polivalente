@@ -23,7 +23,7 @@
 // 9. Copia la URL completa (https://script.google.com/macros/s/...XXX.../exec)
 // 10. Reemplaza la URL de abajo:
 export const GOOGLE_SHEETS_API_URL =
-  "https://script.google.com/macros/s/AKfycbwCsCgfxPV3DRG1OF4zxnKM2Zj4KidGG_-Yi18H8VJEiXETmYtgAoCvkAVOdXYLToEd/exec";
+  "https://script.google.com/macros/s/AKfycby5Aqq0Yd9IeDvb9JKJ1JJooXjgZtJDzS5ezsMC8SN2hMSqoTSOTcsGklebxPbTiu_7/exec";
 
 // 🔐 MODO OFICIAL
 // - false = Conectado a Google Sheets (PRODUCCIÓN - recomendado)

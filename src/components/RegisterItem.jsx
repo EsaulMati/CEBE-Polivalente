@@ -1,30 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Save, PlusCircle, RotateCcw, AlertCircle, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Save,
+  PlusCircle,
+  RotateCcw,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react";
 
-export default function RegisterItem({ 
-  inventory, 
-  onSave, 
-  editItem, 
-  setEditItem, 
-  setActiveTab 
+export default function RegisterItem({
+  inventory,
+  onSave,
+  editItem,
+  setEditItem,
+  setActiveTab,
 }) {
   // Estados de campos del formulario
-  const [itemCode, setItemCode] = useState('');
-  const [product, setProduct] = useState('');
-  const [area, setArea] = useState('');
-  const [description, setDescription] = useState('');
-  const [alto, setAlto] = useState('');
-  const [ancho, setAncho] = useState('');
-  const [largo, setLargo] = useState('');
-  const [marca, setMarca] = useState('');
-  const [observation, setObservation] = useState('');
-  const [estado, setEstado] = useState('Nuevo');
-  const [patrimonialCode, setPatrimonialCode] = useState('');
-  const [inventariado, setInventariado] = useState('Sí');
+  const [itemCode, setItemCode] = useState("");
+  const [product, setProduct] = useState("");
+  const [area, setArea] = useState("");
+  const [description, setDescription] = useState("");
+  const [alto, setAlto] = useState("");
+  const [ancho, setAncho] = useState("");
+  const [largo, setLargo] = useState("");
+  const [marca, setMarca] = useState("");
+  const [observation, setObservation] = useState("");
+  const [estado, setEstado] = useState("BUENO");
+  const [patrimonialCode, setPatrimonialCode] = useState("");
+  const [inventariado, setInventariado] = useState("SI");
 
   // Control de feedback de errores y éxito
-  const [validationError, setValidationError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [validationError, setValidationError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   // Estados para autocompletado de áreas
@@ -32,27 +38,51 @@ export default function RegisterItem({
   const [showAreaSuggestions, setShowAreaSuggestions] = useState(false);
   const areaRef = useRef(null);
 
-  // Obtener todas las áreas únicas actuales
+  // Obtener todas las áreas únicas actuales y combinar con áreas predefinidas
   const uniqueAreas = React.useMemo(() => {
-    const areas = inventory.map(item => item.Área).filter(Boolean);
-    return [...new Set(areas)];
+    const defaultAreas = [
+      "AULA 1",
+      "AULA 2",
+      "AULA 3",
+      "AULA 4",
+      "AULA 5",
+      "AULA 6",
+      "INICIAL 3 AÑOS",
+      "INICIAL 4 AÑOS",
+      "INICIAL 5 AÑOS",
+      "COCINA",
+      "SAANEE",
+      "PSICOLOGÍA",
+      "DEPOSITO DE DIRECCIÓN",
+      "AUDITORIO",
+      "PATIO",
+      "DEPOSITO",
+      "SALA DE ESPERA",
+      "SECRETARÍA",
+      "DIRECCIÓN",
+      "DEP. PSICOMOTRICIDAD",
+    ];
+    const areasFromInventory = inventory
+      .map((item) => item.Área)
+      .filter(Boolean);
+    return [...new Set([...defaultAreas, ...areasFromInventory])].sort();
   }, [inventory]);
 
   // Si estamos en modo edición, cargar datos
   useEffect(() => {
     if (editItem) {
-      setItemCode(editItem.Item || '');
-      setProduct(editItem.Producto || '');
-      setArea(editItem.Área || '');
-      setDescription(editItem.Descripción || '');
-      setAlto(editItem.Alto || '');
-      setAncho(editItem.Ancho || '');
-      setLargo(editItem.Largo || '');
-      setMarca(editItem.Marca || '');
-      setObservation(editItem.Observación || '');
-      setEstado(editItem.Estado || 'Nuevo');
-      setPatrimonialCode(editItem['Código patrimonial'] || '');
-      setInventariado(editItem.Inventariado || 'Sí');
+      setItemCode(editItem.Item || "");
+      setProduct(editItem.Producto || "");
+      setArea(editItem.Área || "");
+      setDescription(editItem.Descripción || "");
+      setAlto(editItem.Alto || "");
+      setAncho(editItem.Ancho || "");
+      setLargo(editItem.Largo || "");
+      setMarca(editItem.Marca || "");
+      setObservation(editItem.Observación || "");
+      setEstado(editItem.Estado || "BUENO");
+      setPatrimonialCode(editItem["Código patrimonial"] || "");
+      setInventariado(editItem.Inventariado || "SI");
     }
   }, [editItem]);
 
@@ -73,12 +103,12 @@ export default function RegisterItem({
   const handleAreaChange = (e) => {
     const value = e.target.value;
     setArea(value);
-    
-    if (value.trim() === '') {
+
+    if (value.trim() === "") {
       setAreaSuggestions(uniqueAreas);
     } else {
-      const filtered = uniqueAreas.filter(a => 
-        a.toLowerCase().includes(value.toLowerCase())
+      const filtered = uniqueAreas.filter((a) =>
+        a.toLowerCase().includes(value.toLowerCase()),
       );
       setAreaSuggestions(filtered);
     }
@@ -91,31 +121,31 @@ export default function RegisterItem({
   };
 
   const handleReset = () => {
-    setItemCode('');
-    setProduct('');
-    setArea('');
-    setDescription('');
-    setAlto('');
-    setAncho('');
-    setLargo('');
-    setMarca('');
-    setObservation('');
-    setEstado('Nuevo');
-    setPatrimonialCode('');
-    setInventariado('Sí');
-    setValidationError('');
-    setSuccessMessage('');
+    setItemCode("");
+    setProduct("");
+    setArea("");
+    setDescription("");
+    setAlto("");
+    setAncho("");
+    setLargo("");
+    setMarca("");
+    setObservation("");
+    setEstado("BUENO");
+    setPatrimonialCode("");
+    setInventariado("SI");
+    setValidationError("");
+    setSuccessMessage("");
   };
 
   const handleCancelEdit = () => {
     setEditItem(null);
-    setActiveTab('search');
+    setActiveTab("search");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError('');
-    setSuccessMessage('');
+    setValidationError("");
+    setSuccessMessage("");
 
     // Validaciones obligatorias
     if (!itemCode.trim()) {
@@ -136,57 +166,65 @@ export default function RegisterItem({
     }
 
     const newItem = {
-      "Item": itemCode.trim(),
-      "Producto": product.trim(),
-      "Área": area.trim(),
-      "Descripción": description.trim(),
-      "Alto": alto.trim(),
-      "Ancho": ancho.trim(),
-      "Largo": largo.trim(),
-      "Marca": marca.trim(),
-      "Observación": observation.trim(),
-      "Estado": estado,
+      Item: itemCode.trim(),
+      Producto: product.trim(),
+      Área: area.trim(),
+      Descripción: description.trim(),
+      Alto: alto.trim(),
+      Ancho: ancho.trim(),
+      Largo: largo.trim(),
+      Marca: marca.trim(),
+      Observación: observation.trim(),
+      Estado: estado,
       "Código patrimonial": patrimonialCode.trim(),
-      "Inventariado": inventariado
+      Inventariado: inventariado,
     };
 
     setIsSaving(true);
     try {
       const response = await onSave(newItem, !!editItem);
-      
+
       if (response.success) {
-        setSuccessMessage(editItem ? 'Ítem actualizado correctamente.' : 'Ítem registrado correctamente.');
-        
+        setSuccessMessage(
+          editItem
+            ? "Ítem actualizado correctamente."
+            : "Ítem registrado correctamente.",
+        );
+
         if (editItem) {
           setTimeout(() => {
             setEditItem(null);
-            setActiveTab('search');
+            setActiveTab("search");
           }, 1500);
         } else {
           handleReset();
         }
       } else {
-        setValidationError(response.message || 'Error al guardar el ítem.');
+        setValidationError(response.message || "Error al guardar el ítem.");
       }
     } catch (err) {
       console.error(err);
-      setValidationError('Error inesperado al guardar.');
+      setValidationError("Error inesperado al guardar.");
     } finally {
       setIsSaving(false);
     }
   };
 
   // Clases reutilizables
-  const inputClass = "w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-school-400 dark:focus:ring-school-500 focus:border-school-500 dark:focus:border-school-600 transition-all text-sm font-medium";
-  const selectClass = "w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-school-400 dark:focus:ring-school-500 focus:border-school-500 dark:focus:border-school-600 transition-all text-sm font-semibold";
-  const labelClass = "block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 transition-colors duration-300";
-  const smallInputClass = "w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm transition-colors duration-300";
+  const inputClass =
+    "w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-school-400 dark:focus:ring-school-500 focus:border-school-500 dark:focus:border-school-600 transition-all text-sm font-medium";
+  const selectClass =
+    "w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-school-400 dark:focus:ring-school-500 focus:border-school-500 dark:focus:border-school-600 transition-all text-sm font-semibold";
+  const labelClass =
+    "block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 transition-colors duration-300";
+  const smallInputClass =
+    "w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm transition-colors duration-300";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       {/* Botón de Regresar si se está editando */}
       {editItem && (
-        <button 
+        <button
           onClick={handleCancelEdit}
           className="flex items-center gap-2 text-school-600 dark:text-school-400 hover:text-school-700 dark:hover:text-school-300 font-bold mb-6 transition-colors cursor-pointer"
         >
@@ -200,8 +238,15 @@ export default function RegisterItem({
         <div className="bg-gradient-to-r from-school-600 to-school-500 p-6 text-white flex items-center gap-4">
           <PlusCircle className="w-8 h-8 text-white/90" />
           <div>
-            <h2 className="text-xl font-bold">{editItem ? 'Editar Ítem del Inventario' : 'Registrar Nuevo Bien Escolar'}</h2>
-            <p className="text-xs text-slate-200 mt-1">Completa los campos para actualizar la base de datos de CEBE Polivalente</p>
+            <h2 className="text-xl font-bold">
+              {editItem
+                ? "Editar Ítem del Inventario"
+                : "Registrar Nuevo Bien Escolar"}
+            </h2>
+            <p className="text-xs text-slate-200 mt-1">
+              Completa los campos para actualizar la base de datos de CEBE
+              Polivalente
+            </p>
           </div>
         </div>
 
@@ -227,7 +272,7 @@ export default function RegisterItem({
               <label className={labelClass}>
                 Item / Código Interno <span className="text-red-500">*</span>
               </label>
-              <input 
+              <input
                 type="text"
                 value={itemCode}
                 onChange={(e) => setItemCode(e.target.value)}
@@ -236,7 +281,9 @@ export default function RegisterItem({
                 className={`${inputClass} font-semibold disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-500`}
               />
               {editItem && (
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block font-medium">El código único no se puede cambiar.</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block font-medium">
+                  El código único no se puede cambiar.
+                </span>
               )}
             </div>
 
@@ -245,7 +292,7 @@ export default function RegisterItem({
               <label className={labelClass}>
                 Producto / Activo <span className="text-red-500">*</span>
               </label>
-              <input 
+              <input
                 type="text"
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
@@ -259,12 +306,18 @@ export default function RegisterItem({
               <label className={labelClass}>
                 Área / Ubicación <span className="text-red-500">*</span>
               </label>
-              <input 
+              <input
                 type="text"
                 value={area}
                 onChange={handleAreaChange}
                 onFocus={() => {
-                  setAreaSuggestions(area ? uniqueAreas.filter(a => a.toLowerCase().includes(area.toLowerCase())) : uniqueAreas);
+                  setAreaSuggestions(
+                    area
+                      ? uniqueAreas.filter((a) =>
+                          a.toLowerCase().includes(area.toLowerCase()),
+                        )
+                      : uniqueAreas,
+                  );
                   setShowAreaSuggestions(true);
                 }}
                 placeholder="Escribe o selecciona un área"
@@ -288,10 +341,8 @@ export default function RegisterItem({
 
             {/* Campo 4: Marca */}
             <div>
-              <label className={labelClass}>
-                Marca / Fabricante
-              </label>
-              <input 
+              <label className={labelClass}>Marca / Fabricante</label>
+              <input
                 type="text"
                 value={marca}
                 onChange={(e) => setMarca(e.target.value)}
@@ -305,8 +356,10 @@ export default function RegisterItem({
               <span className={labelClass}>Dimensiones (en centímetros)</span>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Alto</label>
-                  <input 
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">
+                    Alto
+                  </label>
+                  <input
                     type="number"
                     value={alto}
                     onChange={(e) => setAlto(e.target.value)}
@@ -315,8 +368,10 @@ export default function RegisterItem({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Ancho</label>
-                  <input 
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">
+                    Ancho
+                  </label>
+                  <input
                     type="number"
                     value={ancho}
                     onChange={(e) => setAncho(e.target.value)}
@@ -325,8 +380,10 @@ export default function RegisterItem({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Largo</label>
-                  <input 
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">
+                    Largo
+                  </label>
+                  <input
                     type="number"
                     value={largo}
                     onChange={(e) => setLargo(e.target.value)}
@@ -342,32 +399,39 @@ export default function RegisterItem({
               <label className={labelClass}>
                 Estado Físico <span className="text-red-500">*</span>
               </label>
-              <select value={estado} onChange={(e) => setEstado(e.target.value)} className={selectClass}>
-                <option value="Nuevo">Nuevo</option>
-                <option value="Bueno">Bueno</option>
-                <option value="Regular">Regular</option>
-                <option value="Malo">Malo</option>
-                <option value="Muy malo">Muy malo</option>
+              <select
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+                className={selectClass}
+              >
+                <option value="NUEVO">NUEVO</option>
+                <option value="BUENO">BUENO</option>
+                <option value="REGULAR">REGULAR</option>
+                <option value="MALO">MALO</option>
+                <option value="MUY MALO">MUY MALO</option>
               </select>
             </div>
 
             {/* Campo 6: Inventariado */}
             <div>
               <label className={labelClass}>
-                ¿Inventariado oficialmente? <span className="text-red-500">*</span>
+                ¿Inventariado oficialmente?{" "}
+                <span className="text-red-500">*</span>
               </label>
-              <select value={inventariado} onChange={(e) => setInventariado(e.target.value)} className={selectClass}>
-                <option value="Sí">Sí</option>
-                <option value="No">No</option>
+              <select
+                value={inventariado}
+                onChange={(e) => setInventariado(e.target.value)}
+                className={selectClass}
+              >
+                <option value="SI">SI</option>
+                <option value="NO">NO</option>
               </select>
             </div>
 
             {/* Campo 7: Código Patrimonial */}
             <div>
-              <label className={labelClass}>
-                Código Patrimonial
-              </label>
-              <input 
+              <label className={labelClass}>Código Patrimonial</label>
+              <input
                 type="text"
                 value={patrimonialCode}
                 onChange={(e) => setPatrimonialCode(e.target.value)}
@@ -379,7 +443,7 @@ export default function RegisterItem({
             {/* Campo 8: Descripción */}
             <div className="md:col-span-2">
               <label className={labelClass}>Descripción</label>
-              <textarea 
+              <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detalla las características físicas específicas del bien..."
@@ -391,7 +455,7 @@ export default function RegisterItem({
             {/* Campo 9: Observación */}
             <div className="md:col-span-2">
               <label className={labelClass}>Observación</label>
-              <textarea 
+              <textarea
                 value={observation}
                 onChange={(e) => setObservation(e.target.value)}
                 placeholder="Escribe detalles sobre reparaciones necesarias o notas de uso..."
@@ -434,7 +498,7 @@ export default function RegisterItem({
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              {editItem ? 'Guardar Cambios' : 'Guardar Item'}
+              {editItem ? "Guardar Cambios" : "Guardar Item"}
             </button>
           </div>
         </form>

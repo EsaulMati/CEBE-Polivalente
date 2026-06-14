@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "../assets/logo.jpeg";
+import logo from "../assets/logo-removebg-preview.png";
 import {
   Home,
   PlusCircle,
@@ -39,14 +39,14 @@ export default function Navbar({
         <div className="flex items-center justify-between h-16">
           {/* Logo y Nombre del Sistema */}
           <div
-            className="flex items-center gap-3 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer group"
             onClick={() => handleTabClick("home")}
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/40 flex items-center justify-center bg-white flex-shrink-0">
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center bg-transparent flex-shrink-0 transition-transform group-hover:scale-105">
               <img
                 src={logo}
                 alt="Logo CEBE"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   e.target.style.display = "none";
                   e.target.parentNode.innerHTML =
@@ -99,14 +99,6 @@ export default function Navbar({
               ) : (
                 <Moon className="w-4 h-4 text-slate-300" />
               )}
-            </button>
-
-            <button
-              onClick={onOpenDiagnostics}
-              title="Verificar conexión con Google Sheets"
-              className="flex items-center justify-center p-2 rounded-lg text-slate-100 hover:bg-school-600 hover:text-white transition-all cursor-pointer"
-            >
-              <Wrench className="w-4 h-4" />
             </button>
 
             <button

@@ -156,6 +156,7 @@ export default function App() {
       if (isEdit) {
         response = await updateItem(item);
         if (response.success) {
+          // Actualizar estado local inmediatamente
           setInventory((prev) =>
             prev.map((i) =>
               i.Item.trim().toLowerCase() === item.Item.trim().toLowerCase()
@@ -163,15 +164,20 @@ export default function App() {
                 : i,
             ),
           );
-          toast.success("Ítem actualizado en la nube correctamente.");
+          toast.success("Ítem actualizado correctamente.");
+          // Recargar en segundo plano para sincronía total
+          loadInventoryData(true);
         } else {
           toast.error(response.message || "Error al actualizar el ítem.");
         }
       } else {
         response = await addItem(item);
         if (response.success) {
-          setInventory((prev) => [...prev, item]);
+          // Añadir al estado local inmediatamente al principio de la lista
+          setInventory((prev) => [item, ...prev]);
           toast.success("Ítem guardado y registrado correctamente.");
+          // Recargar en segundo plano para sincronía total
+          loadInventoryData(true);
         } else {
           toast.error(response.message || "Error al registrar el ítem.");
         }

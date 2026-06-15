@@ -182,6 +182,17 @@ export default function Navbar({
               Cerrar sesión
             </button>
           </div>
+
+          {/* Botón de Cerrar Menú (Volver) */}
+          <div className="px-2 pt-2 pb-4">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-base font-bold bg-slate-700/50 text-white hover:bg-slate-700 transition-all border border-white/10"
+            >
+              <X className="w-5 h-5" />
+              Volver
+            </button>
+          </div>
         </div>
       )}
     </nav>

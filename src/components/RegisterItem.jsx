@@ -222,16 +222,17 @@ export default function RegisterItem({
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      {/* Botón de Regresar si se está editando */}
-      {editItem && (
+      {/* Botón de Regresar */}
+      <div className="flex items-center gap-4 mb-6">
         <button
-          onClick={handleCancelEdit}
-          className="flex items-center gap-2 text-school-600 dark:text-school-400 hover:text-school-700 dark:hover:text-school-300 font-bold mb-6 transition-colors cursor-pointer"
+          onClick={() => (editItem ? handleCancelEdit() : setActiveTab("home"))}
+          className="group flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-school-600 dark:hover:text-school-400 hover:border-school-200 dark:hover:border-school-800 transition-all shadow-sm active:scale-95 cursor-pointer"
+          title="Volver"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Volver a la búsqueda
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-bold">Volver</span>
         </button>
-      )}
+      </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-premium dark:shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors duration-300">
         {/* Cabecera del formulario */}

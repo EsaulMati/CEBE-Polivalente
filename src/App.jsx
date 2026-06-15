@@ -287,6 +287,7 @@ export default function App() {
             onEdit={handleStartEdit}
             onDelete={handleDeleteItem}
             onViewDetail={setDetailItem}
+            setActiveTab={setActiveTab}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             filterArea={filterArea}

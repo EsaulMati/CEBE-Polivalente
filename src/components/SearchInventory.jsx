@@ -1,14 +1,23 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, ArrowUpDown, ChevronDown, Download } from 'lucide-react';
-import InventoryTable from './InventoryTable';
-import { exportToExcel } from '../utils/excel';
-import { useToast } from './Toast';
+import React, { useState, useMemo } from "react";
+import {
+  Search,
+  Filter,
+  X,
+  ArrowUpDown,
+  ChevronDown,
+  Download,
+  ArrowLeft,
+} from "lucide-react";
+import InventoryTable from "./InventoryTable";
+import { exportToExcel } from "../utils/excel";
+import { useToast } from "./Toast";
 
-export default function SearchInventory({ 
-  inventory, 
-  onEdit, 
-  onDelete, 
+export default function SearchInventory({
+  inventory,
+  onEdit,
+  onDelete,
   onViewDetail,
+  setActiveTab,
   searchTerm,
   setSearchTerm,
   filterArea,
@@ -18,7 +27,7 @@ export default function SearchInventory({
   filterInventariado,
   setFilterInventariado,
   filterProducto,
-  setFilterProducto
+  setFilterProducto,
 }) {
   const toast = useToast();
 
@@ -28,8 +37,10 @@ export default function SearchInventory({
         toast.info("No hay resultados para exportar.");
         return;
       }
-      exportToExcel(filteredInventory, 'bienes_filtrados_cebe.xlsx');
-      toast.success(`Se exportaron ${filteredInventory.length} activos filtrados.`);
+      exportToExcel(filteredInventory, "bienes_filtrados_cebe.xlsx");
+      toast.success(
+        `Se exportaron ${filteredInventory.length} activos filtrados.`,
+      );
     } catch (err) {
       console.error(err);
       toast.error("Error al exportar los datos a Excel.");
@@ -40,56 +51,97 @@ export default function SearchInventory({
   const filterOptions = useMemo(() => {
     const areas = new Set();
     const productos = new Set();
-    
-    inventory.forEach(item => {
+
+    inventory.forEach((item) => {
       if (item.Área) areas.add(item.Área);
       if (item.Producto) productos.add(item.Producto);
     });
 
     return {
       areas: [...areas].sort(),
-      productos: [...productos].sort()
+      productos: [...productos].sort(),
     };
   }, [inventory]);
 
   // Lógica de filtrado en memoria
   const filteredInventory = useMemo(() => {
-    return inventory.filter(item => {
+    return inventory.filter((item) => {
       // Búsqueda general
-      const matchesSearch = !searchTerm.trim() || [
-        item.Item,
-        item.Producto,
-        item.Descripción,
-        item.Marca,
-        item['Código patrimonial'],
-        item.Área
-      ].some(field => 
-        field && field.toString().toLowerCase().includes(searchTerm.toLowerCase().trim())
-      );
+      const matchesSearch =
+        !searchTerm.trim() ||
+        [
+          item.Item,
+          item.Producto,
+          item.Descripción,
+          item.Marca,
+          item["Código patrimonial"],
+          item.Área,
+        ].some(
+          (field) =>
+            field &&
+            field
+              .toString()
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase().trim()),
+        );
 
       // Filtros específicos
       const matchesArea = !filterArea || item.Área === filterArea;
       const matchesEstado = !filterEstado || item.Estado === filterEstado;
-      const matchesInventariado = !filterInventariado || item.Inventariado === filterInventariado;
-      const matchesProducto = !filterProducto || item.Producto === filterProducto;
+      const matchesInventariado =
+        !filterInventariado || item.Inventariado === filterInventariado;
+      const matchesProducto =
+        !filterProducto || item.Producto === filterProducto;
 
-      return matchesSearch && matchesArea && matchesEstado && matchesInventariado && matchesProducto;
+      return (
+        matchesSearch &&
+        matchesArea &&
+        matchesEstado &&
+        matchesInventariado &&
+        matchesProducto
+      );
     });
-  }, [inventory, searchTerm, filterArea, filterEstado, filterInventariado, filterProducto]);
+  }, [
+    inventory,
+    searchTerm,
+    filterArea,
+    filterEstado,
+    filterInventariado,
+    filterProducto,
+  ]);
 
   // Limpiar todos los filtros
   const handleClearFilters = () => {
-    setSearchTerm('');
-    setFilterArea('');
-    setFilterEstado('');
-    setFilterInventariado('');
-    setFilterProducto('');
+    setSearchTerm("");
+    setFilterArea("");
+    setFilterEstado("");
+    setFilterInventariado("");
+    setFilterProducto("");
   };
 
-  const hasActiveFilters = searchTerm !== '' || filterArea !== '' || filterEstado !== '' || filterInventariado !== '' || filterProducto !== '';
+  const hasActiveFilters =
+    searchTerm !== "" ||
+    filterArea !== "" ||
+    filterEstado !== "" ||
+    filterInventariado !== "" ||
+    filterProducto !== "";
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      {/* Botón Volver y Título (Navegación Móvil Mejorada) */}
+      <div className="flex items-center gap-4 mb-2">
+        <button
+          onClick={() => setActiveTab("home")}
+          className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-school-600 dark:hover:text-school-400 hover:border-school-200 dark:hover:border-school-800 transition-all shadow-sm active:scale-95 cursor-pointer"
+          title="Volver al inicio"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+          Buscar Inventario
+        </h1>
+      </div>
+
       {/* Contenedor de Filtros */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-premium dark:shadow-2xl border border-slate-100 dark:border-slate-800/80 space-y-4 transition-colors duration-300">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -136,8 +188,10 @@ export default function SearchInventory({
                 className="block w-full appearance-none px-3 py-2 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-school-400 dark:focus:ring-school-500 text-xs font-semibold pr-8 transition-colors duration-300"
               >
                 <option value="">Todos los productos</option>
-                {filterOptions.productos.map(p => (
-                  <option key={p} value={p}>{p}</option>
+                {filterOptions.productos.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400 dark:text-slate-550">
@@ -158,8 +212,10 @@ export default function SearchInventory({
                 className="block w-full appearance-none px-3 py-2 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-school-400 dark:focus:ring-school-500 text-xs font-semibold pr-8 transition-colors duration-300"
               >
                 <option value="">Todas las áreas</option>
-                {filterOptions.areas.map(a => (
-                  <option key={a} value={a}>{a}</option>
+                {filterOptions.areas.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400 dark:text-slate-550">
@@ -221,10 +277,13 @@ export default function SearchInventory({
           <h3 className="text-md font-bold text-slate-800 dark:text-slate-100">
             Lista de Bienes
             <span className="ml-2 bg-school-50 dark:bg-school-900/50 text-school-700 dark:text-school-300 text-xs font-extrabold px-2.5 py-1 rounded-full transition-colors duration-300">
-              {filteredInventory.length} {filteredInventory.length === 1 ? 'coincidencia' : 'coincidencias'}
+              {filteredInventory.length}{" "}
+              {filteredInventory.length === 1
+                ? "coincidencia"
+                : "coincidencias"}
             </span>
           </h3>
-          
+
           <button
             onClick={handleExportFiltered}
             disabled={filteredInventory.length === 0}
@@ -234,8 +293,8 @@ export default function SearchInventory({
             Exportar filtrados (.xlsx)
           </button>
         </div>
-        
-        <InventoryTable 
+
+        <InventoryTable
           filteredInventory={filteredInventory}
           onEdit={onEdit}
           onDelete={onDelete}

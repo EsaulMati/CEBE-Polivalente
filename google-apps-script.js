@@ -37,6 +37,8 @@ var FIELD_MAPPING = {
   PRODUCTO: "Producto",
   ÁREA: "Área",
   AREA: "Área",
+  UBICACIÓN: "Área",
+  UBICACION: "Área",
   DESCRIPCIÓN: "Descripción",
   DESCRIPCION: "Descripción",
   ALTO: "Alto",
@@ -49,11 +51,34 @@ var FIELD_MAPPING = {
   OBSERVACIÓN: "Observación",
   OBSERVACION: "Observación",
   ESTADO: "Estado",
+  "ESTADO FÍSICO": "Estado",
+  "ESTADO FISICO": "Estado",
+  "ESTADO DEL BIEN": "EstadoBien",
+  "ESTADO BIEN": "EstadoBien",
+  "ALTA/BAJA": "AltaBaja",
+  "ALTA BAJA": "AltaBaja",
   CÓDIGO: "Código patrimonial",
   CODIGO: "Código patrimonial",
   "CÓDIGO PATRIMONIAL": "Código patrimonial",
   "CODIGO PATRIMONIAL": "Código patrimonial",
   INVENTARIADO: "Inventariado",
+  BI: "Inventariado",
+};
+
+var COL_ALTA_BAJA = 56;
+var COL_BH = 60;
+var COL_BI = 61;
+var FONT_FAMILY = "Arial Narrow";
+var FONT_SIZE = 9;
+var VALIDATION_SI_NO = ["SI", "NO"];
+var VALIDATION_ESTADO_BIEN = ["1", "2", "3", "4", "5"];
+var VALIDATION_ALTA_BAJA = ["ALTA", "BAJA"];
+var ESTADO_FISICO_MAP = {
+  "5": "NUEVO",
+  "1": "BUENO",
+  "2": "REGULAR",
+  "3": "MALO",
+  "4": "MUY MALO",
 };
 
 var AUTH_TTL_SECONDS = 30 * 60; // 30 minutos
@@ -124,6 +149,96 @@ function normalizeValue(value) {
     );
   }
   return value === undefined || value === null ? "" : value.toString().trim();
+}
+
+function buildDropdownRule(values) {
+  return SpreadsheetApp.newDataValidation()
+    .requireValueInList(values, true)
+    .setAllowInvalid(false)
+    .setHelpText("Selecciona uno de los valores permitidos.");
+}
+
+function getColumnIndexByHeader(headers, names, fallbackPosition) {
+  for (var i = 0; i < names.length; i++) {
+    var index = headers.indexOf(names[i]);
+    if (index !== -1) {
+      return index;
+    }
+  }
+  if (
+    fallbackPosition !== undefined &&
+    fallbackPosition >= 1 &&
+    fallbackPosition <= headers.length
+  ) {
+    return fallbackPosition - 1;
+  }
+  return -1;
+}
+
+function getDistinctColumnValues(data, index) {
+  var values = {};
+  for (var i = 1; i < data.length; i++) {
+    var value = normalizeValue(data[i][index]);
+    if (value !== "") {
+      values[value] = true;
+    }
+  }
+  return Object.keys(values).sort();
+}
+
+function setItemDataValues(sheet, rowIndex, headers, itemData) {
+  for (var j = 0; j < headers.length; j++) {
+    var appField = FIELD_MAPPING[headers[j]];
+    if (appField && itemData[appField] !== undefined) {
+      sheet.getRange(rowIndex, j + 1).setValue(normalizeValue(itemData[appField]));
+    }
+  }
+}
+
+function applyValidationsToRow(sheet, rowIndex, headers, info) {
+  var altaBajaIndex = getColumnIndexByHeader(headers, ["ALTA/BAJA", "ALTA BAJA"], COL_ALTA_BAJA);
+  if (altaBajaIndex !== -1) {
+    sheet
+      .getRange(rowIndex, altaBajaIndex + 1)
+      .setDataValidation(buildDropdownRule(VALIDATION_ALTA_BAJA));
+  }
+
+  var estadoBienIndex = getColumnIndexByHeader(headers, ["ESTADO DEL BIEN", "ESTADO BIEN"], null);
+  if (estadoBienIndex !== -1) {
+    sheet
+      .getRange(rowIndex, estadoBienIndex + 1)
+      .setDataValidation(buildDropdownRule(VALIDATION_ESTADO_BIEN));
+  }
+
+  var inventariadoIndex = getColumnIndexByHeader(headers, ["INVENTARIADO", "BI"], COL_BI);
+  if (inventariadoIndex !== -1) {
+    sheet
+      .getRange(rowIndex, inventariadoIndex + 1)
+      .setDataValidation(buildDropdownRule(VALIDATION_SI_NO));
+  }
+
+  var areaIndex = getColumnIndexByHeader(headers, ["ÁREA", "AREA", "UBICACIÓN", "UBICACION"], null);
+  if (areaIndex !== -1) {
+    var areaValues = getDistinctColumnValues(info.data, areaIndex);
+    if (areaValues.length > 0) {
+      sheet
+        .getRange(rowIndex, areaIndex + 1)
+        .setDataValidation(buildDropdownRule(areaValues));
+    }
+  }
+}
+
+function copyRowTemplate(sheet, sourceRowIndex, targetRowIndex, numCols) {
+  if (sourceRowIndex < 1 || targetRowIndex < 1 || sourceRowIndex === targetRowIndex) {
+    return;
+  }
+  var sourceRange = sheet.getRange(sourceRowIndex, 1, 1, numCols);
+  var targetRange = sheet.getRange(targetRowIndex, 1, 1, numCols);
+
+  sourceRange.copyTo(targetRange, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+  sourceRange.copyTo(targetRange, SpreadsheetApp.CopyPasteType.PASTE_DATA_VALIDATION, false);
+  sourceRange.copyTo(targetRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false);
+  sourceRange.copyTo(targetRange, SpreadsheetApp.CopyPasteType.PASTE_CONDITIONAL_FORMATTING, false);
 }
 
 function findHeaderRow(sheet) {
@@ -367,7 +482,6 @@ function addItem(itemData) {
     return { success: false, message: "El código de Item ya existe." };
   }
 
-  var rowValues = mapRowFromItem(itemData, headers);
   var itemColumnIndex = headers.indexOf("ITEM");
   var emptyRowIndex = -1;
 
@@ -378,44 +492,24 @@ function addItem(itemData) {
     }
   }
 
-  if (emptyRowIndex !== -1) {
-    var targetRange = sheet.getRange(
-      info.headerRow + emptyRowIndex,
-      1,
-      1,
-      rowValues.length,
-    );
-    targetRange.setValues([rowValues]);
-
-    // COPIAR FORMATO (incluyendo desplegables) de la fila superior (encabezados o fila anterior)
-    var sourceRange = sheet.getRange(info.headerRow, 1, 1, rowValues.length);
-    sourceRange.copyTo(
-      targetRange,
-      SpreadsheetApp.CopyPasteType.PASTE_DATA_VALIDATION,
-      false,
-    );
-  } else {
-    var targetRange = sheet.getRange(
-      info.headerRow + data.length,
-      1,
-      1,
-      rowValues.length,
-    );
-    targetRange.setValues([rowValues]);
-
-    // COPIAR FORMATO (incluyendo desplegables) de la fila superior
-    var sourceRange = sheet.getRange(
-      info.headerRow + data.length - 1,
-      1,
-      1,
-      rowValues.length,
-    );
-    sourceRange.copyTo(
-      targetRange,
-      SpreadsheetApp.CopyPasteType.PASTE_DATA_VALIDATION,
-      false,
-    );
+  var targetRow = emptyRowIndex !== -1 ? info.headerRow + emptyRowIndex : info.headerRow + data.length;
+  var sourceRow = targetRow - 1;
+  if (sourceRow < info.headerRow) {
+    sourceRow = info.headerRow;
   }
+
+  copyRowTemplate(sheet, sourceRow, targetRow, headers.length);
+
+  var targetRange = sheet.getRange(targetRow, 1, 1, headers.length);
+  targetRange.setFontFamily(FONT_FAMILY).setFontSize(FONT_SIZE);
+  setItemDataValues(sheet, targetRow, headers, itemData);
+
+  var bhIndex = getColumnIndexByHeader(headers, ["BH"], COL_BH);
+  if (bhIndex !== -1) {
+    sheet.getRange(targetRow, bhIndex + 1).clearContent();
+  }
+
+  applyValidationsToRow(sheet, targetRow, headers, info);
 
   return { success: true, message: "Ítem agregado con éxito." };
 }
@@ -439,23 +533,18 @@ function updateItem(itemData) {
     return { success: false, message: "No se encontró el ítem." };
   }
 
-  var updatedRow = [];
-  for (var j = 0; j < headers.length; j++) {
-    var appField = FIELD_MAPPING[headers[j]];
-    if (appField) {
-      updatedRow.push(
-        itemData[appField] !== undefined
-          ? itemData[appField]
-          : normalizeValue(data[rowIndex][j]),
-      );
-    } else {
-      updatedRow.push(normalizeValue(data[rowIndex][j]));
-    }
+  var targetRow = info.headerRow + rowIndex;
+  var targetRange = sheet.getRange(targetRow, 1, 1, headers.length);
+  targetRange.setFontFamily(FONT_FAMILY).setFontSize(FONT_SIZE);
+  setItemDataValues(sheet, targetRow, headers, itemData);
+
+  var bhIndex = getColumnIndexByHeader(headers, ["BH"], COL_BH);
+  if (bhIndex !== -1) {
+    sheet.getRange(targetRow, bhIndex + 1).clearContent();
   }
 
-  sheet
-    .getRange(info.headerRow + rowIndex, 1, 1, headers.length)
-    .setValues([updatedRow]);
+  applyValidationsToRow(sheet, targetRow, headers, info);
+
   return { success: true, message: "Ítem actualizado con éxito." };
 }
 

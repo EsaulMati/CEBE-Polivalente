@@ -25,6 +25,8 @@ export default function RegisterItem({
   const [marca, setMarca] = useState("");
   const [observation, setObservation] = useState("");
   const [estado, setEstado] = useState("BUENO");
+  const [estadoBien, setEstadoBien] = useState("5");
+  const [altaBaja, setAltaBaja] = useState("ALTA");
   const [patrimonialCode, setPatrimonialCode] = useState("");
   const [inventariado, setInventariado] = useState("SI");
 
@@ -81,6 +83,8 @@ export default function RegisterItem({
       setMarca(editItem.Marca || "");
       setObservation(editItem.Observación || "");
       setEstado(editItem.Estado || "BUENO");
+      setEstadoBien(editItem.EstadoBien || "5");
+      setAltaBaja(editItem.AltaBaja || "ALTA");
       setPatrimonialCode(editItem["Código patrimonial"] || "");
       setInventariado(editItem.Inventariado || "SI");
     }
@@ -131,6 +135,8 @@ export default function RegisterItem({
     setMarca("");
     setObservation("");
     setEstado("BUENO");
+    setEstadoBien("5");
+    setAltaBaja("ALTA");
     setPatrimonialCode("");
     setInventariado("SI");
     setValidationError("");
@@ -164,6 +170,14 @@ export default function RegisterItem({
       setValidationError('El campo "Estado" es obligatorio.');
       return;
     }
+    if (!estadoBien) {
+      setValidationError('El campo "Estado del Bien" es obligatorio.');
+      return;
+    }
+    if (!altaBaja) {
+      setValidationError('El campo "Alta/Baja" es obligatorio.');
+      return;
+    }
 
     const newItem = {
       Item: itemCode.trim(),
@@ -176,6 +190,8 @@ export default function RegisterItem({
       Marca: marca.trim(),
       Observación: observation.trim(),
       Estado: estado,
+      EstadoBien: estadoBien,
+      AltaBaja: altaBaja,
       "Código patrimonial": patrimonialCode.trim(),
       Inventariado: inventariado,
     };
@@ -395,7 +411,7 @@ export default function RegisterItem({
               </div>
             </div>
 
-            {/* Campo 5: Estado */}
+            {/* Campo 5: Estado Físico */}
             <div>
               <label className={labelClass}>
                 Estado Físico <span className="text-red-500">*</span>
@@ -413,11 +429,43 @@ export default function RegisterItem({
               </select>
             </div>
 
-            {/* Campo 6: Inventariado */}
+            {/* Campo 6: Estado del Bien */}
             <div>
               <label className={labelClass}>
-                ¿Inventariado oficialmente?{" "}
-                <span className="text-red-500">*</span>
+                Estado del Bien <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={estadoBien}
+                onChange={(e) => setEstadoBien(e.target.value)}
+                className={selectClass}
+              >
+                <option value="5">5 - Nuevo</option>
+                <option value="1">1 - Bueno</option>
+                <option value="2">2 - Regular</option>
+                <option value="3">3 - Malo</option>
+                <option value="4">4 - Muy malo</option>
+              </select>
+            </div>
+
+            {/* Campo 7: Alta/Baja */}
+            <div>
+              <label className={labelClass}>
+                Alta / Baja <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={altaBaja}
+                onChange={(e) => setAltaBaja(e.target.value)}
+                className={selectClass}
+              >
+                <option value="ALTA">ALTA</option>
+                <option value="BAJA">BAJA</option>
+              </select>
+            </div>
+
+            {/* Campo 8: Inventariado */}
+            <div>
+              <label className={labelClass}>
+                ¿Inventariado oficialmente? <span className="text-red-500">*</span>
               </label>
               <select
                 value={inventariado}
